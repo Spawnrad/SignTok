@@ -4,7 +4,7 @@ const { createCipheriv } = require("crypto");
 
 class Signer {
   static DEFAULT_USERAGENT =
-    "Mozilla/5.0 (Linux; Android 11; SAMSUNG SM-G973U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/14.2 Chrome/87.0.4280.141 Mobile Safari/537.36";
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36";
   static PASSWORD = "webapp1.0+202106";
   /**
    * @type Window
@@ -12,7 +12,10 @@ class Signer {
   window = null;
 
   constructor(userAgent = Signer.DEFAULT_USERAGENT) {
-    const signature_js = fs.readFileSync(__dirname + "/../js/signature.js", "utf-8");
+    const signature_js = fs.readFileSync(
+      __dirname + "/../js/signature.js",
+      "utf-8"
+    );
     const webmssdk = fs.readFileSync(__dirname + "/../js/webmssdk.js", "utf-8");
     const resourceLoader = new ResourceLoader({ userAgent });
 
@@ -23,13 +26,13 @@ class Signer {
       includeNodeLocations: false,
       runScripts: "outside-only",
       pretendToBeVisual: true,
-      resources: resourceLoader
+      resources: resourceLoader,
     });
     this.window = window;
     this.window.eval(signature_js.toString());
     this.window.byted_acrawler.init({
       aid: 24,
-      dfp: true
+      dfp: true,
     });
     this.window.eval(webmssdk);
   }
@@ -41,7 +44,7 @@ class Signer {
       browser_language: this.window.navigator.language,
       browser_platform: this.window.navigator.platform,
       browser_name: this.window.navigator.appCodeName,
-      browser_version: this.window.navigator.appVersion
+      browser_version: this.window.navigator.appVersion,
     };
   }
 
@@ -57,22 +60,28 @@ class Signer {
     params += "&verifyFp=undefined";
     params += "&is_encryption=1";
     // Encrypt query string using aes-128-cbc
-    const cipher = createCipheriv("aes-128-cbc", Signer.PASSWORD, Signer.PASSWORD);
-    return Buffer.concat([cipher.update(params), cipher.final()]).toString("base64");
+    const cipher = createCipheriv(
+      "aes-128-cbc",
+      Signer.PASSWORD,
+      Signer.PASSWORD
+    );
+    return Buffer.concat([cipher.update(params), cipher.final()]).toString(
+      "base64"
+    );
   }
 
   sign(url_str) {
     const url = new URL(url_str);
     const signature = this.signature(url.toString());
-    url.searchParams.append('_signature', signature);
+    url.searchParams.append("_signature", signature);
     const bogus = this.bogus(url.searchParams.toString());
-    url.searchParams.append('X-Bogus', bogus);
+    url.searchParams.append("X-Bogus", bogus);
     const xttparams = this.xttparams(url.searchParams.toString());
     return {
       signature: signature,
       signed_url: url.toString(),
       "x-tt-params": xttparams,
-      "X-Bogus": bogus
+      "X-Bogus": bogus,
     };
   }
 }
